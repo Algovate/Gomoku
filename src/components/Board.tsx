@@ -7,9 +7,10 @@ interface BoardProps {
     onCellClick: (x: number, y: number) => void;
     lastMove: { x: number, y: number } | null;
     hintMove?: { x: number, y: number } | null;
+    hoverMove?: { x: number, y: number } | null; // New: for move history hover preview
 }
 
-const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove }) => {
+const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove, hoverMove }) => {
     const [activeRipple, setActiveRipple] = useState<string | null>(null);
     const [newPieces, setNewPieces] = useState<Set<string>>(new Set());
     const [hoverCell, setHoverCell] = useState<{ x: number, y: number } | null>(null);
@@ -134,6 +135,7 @@ const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove })
                     row.map((cell, y) => {
                         const isLastMove = lastMove?.x === x && lastMove?.y === y;
                         const isHint = hintMove?.x === x && hintMove?.y === y;
+                        const isHoverPreview = hoverMove?.x === x && hoverMove?.y === y; // History hover preview
                         const pieceKey = `${x}-${y}`;
                         const isNewPiece = newPieces.has(pieceKey);
                         const isHovered = hoverCell?.x === x && hoverCell?.y === y;
@@ -175,8 +177,8 @@ const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove })
                                         {/* Enhanced highlight for 3D effect */}
                                         <div
                                             className={`absolute rounded-full ${cell === 'black'
-                                                    ? 'top-[4px] left-[6px] w-3 h-3 bg-gradient-radial from-white to-transparent opacity-30'
-                                                    : 'top-[3px] left-[5px] w-4 h-4 bg-gradient-radial from-white to-transparent opacity-90'
+                                                ? 'top-[4px] left-[6px] w-3 h-3 bg-gradient-radial from-white to-transparent opacity-30'
+                                                : 'top-[3px] left-[5px] w-4 h-4 bg-gradient-radial from-white to-transparent opacity-90'
                                                 }`}
                                             style={{
                                                 background: cell === 'black'
@@ -207,12 +209,23 @@ const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove })
                                     <div className="w-7 h-7 rounded-full bg-success-400 opacity-70 animate-pulse-glow shadow-elevation-2 border-2 border-success-500" />
                                 )}
 
+                                {/* History hover preview - dashed circle */}
+                                {!cell && !isHint && isHoverPreview && (
+                                    <div
+                                        className="w-7 h-7 rounded-full border-2 border-dashed border-primary-500 opacity-60 animate-fade-in-scale"
+                                        style={{
+                                            borderWidth: '2px',
+                                            borderStyle: 'dashed',
+                                        }}
+                                    />
+                                )}
+
                                 {/* Preview piece on hover */}
-                                {!cell && !isHint && isHovered && (
+                                {!cell && !isHint && !isHoverPreview && isHovered && (
                                     <div
                                         className={`w-[30px] h-[30px] rounded-full animate-fade-in-scale ${currentPlayer === 'black'
-                                                ? 'bg-gradient-to-br from-gray-900 via-black to-gray-950 opacity-30'
-                                                : 'bg-gradient-to-br from-white via-gray-50 to-gray-200 opacity-40 border border-gray-300'
+                                            ? 'bg-gradient-to-br from-gray-900 via-black to-gray-950 opacity-30'
+                                            : 'bg-gradient-to-br from-white via-gray-50 to-gray-200 opacity-40 border border-gray-300'
                                             }`}
                                         style={{
                                             boxShadow: currentPlayer === 'black'

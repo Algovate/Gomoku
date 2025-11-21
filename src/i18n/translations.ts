@@ -49,6 +49,9 @@ export interface Translations {
     medium: string;
     fast: string;
     playbackSpeed: string;
+    // Scroll Control
+    lockScroll: string;
+    unlockScroll: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -101,6 +104,9 @@ export const translations: Record<Language, Translations> = {
         medium: 'Medium',
         fast: 'Fast',
         playbackSpeed: 'Playback Speed',
+        // Scroll Control
+        lockScroll: 'Lock Scroll',
+        unlockScroll: 'Unlock Scroll',
     },
     zh: {
         title: '五子棋',
@@ -151,6 +157,9 @@ export const translations: Record<Language, Translations> = {
         medium: '中速',
         fast: '快速',
         playbackSpeed: '播放速度',
+        // Scroll Control
+        lockScroll: '锁定滚动',
+        unlockScroll: '解锁滚动',
     },
     ja: {
         title: '五目並べ',
@@ -201,5 +210,8 @@ export const translations: Record<Language, Translations> = {
         medium: '標準',
         fast: '速い',
         playbackSpeed: '再生速度',
+        // Scroll Control
+        lockScroll: 'スクロールロック',
+        unlockScroll: 'スクロール解除',
     },
 };

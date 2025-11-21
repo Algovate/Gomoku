@@ -49,6 +49,14 @@ const Game: React.FC = () => {
     const [reviewSpeed, setReviewSpeed] = useState(1000); // Medium: 1000ms
     const [matchDuration, setMatchDuration] = useState(600); // Standard: 10 minutes
 
+    // Move history UI control states
+    const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(() => {
+        // Auto-collapse for competition and spectator modes
+        return playMode === 'competition' || playMode === 'spectator';
+    });
+    const [hoverMove, setHoverMove] = useState<{ x: number, y: number } | null>(null);
+    const [autoScrollLocked, setAutoScrollLocked] = useState(false);
+
     // Sync sound manager with state
     useEffect(() => {
         soundManager.setEnabled(soundEnabled);
@@ -117,12 +125,12 @@ const Game: React.FC = () => {
         }
     }, [playMode, reviewIndex, moveHistory]);
 
-    // Auto-scroll to latest move in history
+    // Auto-scroll to latest move in history (with lock support)
     useEffect(() => {
-        if (moveHistoryRef.current && playMode !== 'review') {
+        if (moveHistoryRef.current && playMode !== 'review' && !autoScrollLocked) {
             moveHistoryRef.current.scrollTop = moveHistoryRef.current.scrollHeight;
         }
-    }, [moveHistory.length, playMode]);
+    }, [moveHistory.length, playMode, autoScrollLocked]);
 
     const handleCellClick = useCallback((x: number, y: number) => {
         if (playMode === 'review' || playMode === 'spectator') return; // No moves in review or spectator mode
@@ -237,6 +245,7 @@ const Game: React.FC = () => {
         setIsAutoPlaying(false);
         setShowHint(false);
         setAiHint(null);
+        setAutoScrollLocked(false); // Reset scroll lock on new game
     };
 
     const undoMove = () => {
@@ -517,8 +526,8 @@ const Game: React.FC = () => {
                                                 setWhiteTime(value);
                                             }}
                                             className={`px-2.5 py-1 text-xs rounded-full transition-all ${matchDuration === value
-                                                    ? 'bg-primary-500 text-white shadow-elevation-2'
-                                                    : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
+                                                ? 'bg-primary-500 text-white shadow-elevation-2'
+                                                : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
                                                 }`}
                                         >
                                             {emoji} {label}
@@ -625,31 +634,73 @@ const Game: React.FC = () => {
 
                     {/* Move History */}
                     <div className="material-card bg-surface shadow-elevation-2 p-4 rounded-2xl flex flex-col" style={{ maxHeight: '400px' }}>
-                        <h2 className="text-lg font-semibold mb-3 text-gray-800">{t.moveHistory}</h2>
-                        <div ref={moveHistoryRef} className="flex-1 overflow-y-auto pr-2" style={{ scrollBehavior: 'smooth', willChange: 'scroll-position' }}>
-                            {moveHistory.length === 0 ? (
-                                <p className="text-sm text-gray-500 text-center py-4">{t.noMovesYet}</p>
-                            ) : (
-                                <div className="space-y-1.5">
-                                    {moveHistory.map((move, index) => (
-                                        <div
-                                            key={index}
-                                            className={`text-sm flex items-center gap-2 p-2 rounded-lg transition-all duration-material-fast ${playMode === 'review' && index === reviewIndex - 1
-                                                ? 'bg-primary-100 text-primary-700 shadow-elevation-1'
-                                                : 'text-gray-700 hover:bg-surface-100'
-                                                }`}
-                                        >
-                                            <span className="font-mono text-xs text-gray-500 w-6">{index + 1}.</span>
-                                            <span className={`w-4 h-4 rounded-full shadow-elevation-1 ${move.player === 'black'
-                                                ? 'bg-gradient-to-br from-gray-800 to-black'
-                                                : 'bg-gradient-to-br from-gray-100 to-white border border-gray-300'
-                                                }`} />
-                                            <span className="font-mono">({move.x}, {move.y})</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                        {/* Header with collapse button */}
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-lg font-semibold text-gray-800">{t.moveHistory}</h2>
+                            <button
+                                onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
+                                className="text-gray-500 hover:text-gray-700 transition-colors duration-material-fast text-xl leading-none"
+                                title={isHistoryCollapsed ? 'Expand' : 'Collapse'}
+                            >
+                                {isHistoryCollapsed ? '▶' : '▼'}
+                            </button>
                         </div>
+
+                        {/* Collapsible content */}
+                        {!isHistoryCollapsed && (
+                            <>
+                                {/* Scroll lock button for spectator mode */}
+                                {playMode === 'spectator' && moveHistory.length > 0 && (
+                                    <button
+                                        onClick={() => setAutoScrollLocked(!autoScrollLocked)}
+                                        className={`mb-2 px-3 py-1.5 text-xs rounded-full transition-all duration-material-normal ${autoScrollLocked
+                                            ? 'bg-warning-500 text-white shadow-elevation-1'
+                                            : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
+                                            }`}
+                                    >
+                                        {autoScrollLocked ? `🔒 ${t.lockScroll}` : `🔓 ${t.unlockScroll}`}
+                                    </button>
+                                )}
+
+                                <div ref={moveHistoryRef} className="flex-1 overflow-y-auto pr-2" style={{ scrollBehavior: 'smooth', willChange: 'scroll-position' }}>
+                                    {moveHistory.length === 0 ? (
+                                        <p className="text-sm text-gray-500 text-center py-4">{t.noMovesYet}</p>
+                                    ) : (
+                                        <div className="space-y-1.5">
+                                            {moveHistory.map((move, index) => {
+                                                const isCurrentMove = playMode === 'review' && index === reviewIndex - 1;
+                                                const isClickable = playMode === 'review';
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        onClick={() => isClickable && setReviewIndex(index + 1)}
+                                                        onMouseEnter={() => setHoverMove({ x: move.x, y: move.y })}
+                                                        onMouseLeave={() => setHoverMove(null)}
+                                                        className={`text-sm flex items-center gap-2 p-2 rounded-lg transition-all duration-material-fast ${isCurrentMove
+                                                            ? 'bg-primary-100 text-primary-700 shadow-elevation-1'
+                                                            : 'text-gray-700 hover:bg-surface-100'
+                                                            } ${isClickable ? 'cursor-pointer' : ''}`}
+                                                    >
+                                                        {/* Current step indicator */}
+                                                        {isCurrentMove && (
+                                                            <span className="text-primary-600">👉</span>
+                                                        )}
+
+                                                        <span className="font-mono text-xs text-gray-500 w-6">{index + 1}.</span>
+                                                        <span className={`w-4 h-4 rounded-full shadow-elevation-1 ${move.player === 'black'
+                                                            ? 'bg-gradient-to-br from-gray-800 to-black'
+                                                            : 'bg-gradient-to-br from-gray-100 to-white border border-gray-300'
+                                                            }`} />
+                                                        <span className="font-mono">({move.x}, {move.y})</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -660,6 +711,7 @@ const Game: React.FC = () => {
                         onCellClick={handleCellClick}
                         lastMove={lastMove}
                         hintMove={playMode === 'teaching' && showHint ? aiHint : null}
+                        hoverMove={hoverMove}
                     />
 
                     {/* Review mode controls */}
