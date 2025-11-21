@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" fill="none">
+  <!-- Full logo with text -->
+  <defs>
+    <linearGradient id="logoBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fafaf9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f5f4;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="logoStoneGradient" cx="50%" cy="30%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0" />
+    </radialGradient>
+    <filter id="logoShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Icon part -->
+  <g transform="translate(20, 20)">
+    <!-- Background circle -->
+    <circle cx="40" cy="40" r="38" fill="url(#logoBgGradient)" stroke="#d6d3d1" stroke-width="1.5"/>
+    <circle cx="40" cy="40" r="38" fill="none" stroke="#78716c" stroke-width="0.5" opacity="0.3"/>
+    
+    <!-- Subtle grid -->
+    <g opacity="0.1" stroke="#78716c" stroke-width="0.5">
+      <line x1="8" y1="18" x2="72" y2="18"/>
+      <line x1="8" y1="28" x2="72" y2="28"/>
+      <line x1="8" y1="38" x2="72" y2="38"/>
+      <line x1="8" y1="48" x2="72" y2="48"/>
+      <line x1="8" y1="58" x2="72" y2="58"/>
+      <line x1="8" y1="62" x2="72" y2="62"/>
+      <line x1="8" y1="18" x2="8" y2="62"/>
+      <line x1="18" y1="18" x2="18" y2="62"/>
+      <line x1="28" y1="18" x2="28" y2="62"/>
+      <line x1="38" y1="18" x2="38" y2="62"/>
+      <line x1="48" y1="18" x2="48" y2="62"/>
+      <line x1="58" y1="18" x2="58" y2="62"/>
+      <line x1="68" y1="18" x2="68" y2="62"/>
+      <line x1="72" y1="18" x2="72" y2="62"/>
+    </g>
+    
+    <!-- Five connected stones with highlights -->
+    <circle cx="18" cy="40" r="9" fill="#1c1917" filter="url(#logoShadow)"/>
+    <circle cx="18" cy="40" r="9" fill="url(#logoStoneGradient)"/>
+    <circle cx="30" cy="40" r="9" fill="#1c1917" filter="url(#logoShadow)"/>
+    <circle cx="30" cy="40" r="9" fill="url(#logoStoneGradient)"/>
+    <circle cx="42" cy="40" r="9" fill="#1c1917" filter="url(#logoShadow)"/>
+    <circle cx="42" cy="40" r="9" fill="url(#logoStoneGradient)"/>
+    <circle cx="54" cy="40" r="9" fill="#fafaf9" stroke="#1c1917" stroke-width="1.3" filter="url(#logoShadow)"/>
+    <circle cx="54" cy="40" r="7" fill="url(#logoStoneGradient)" opacity="0.4"/>
+    <circle cx="66" cy="40" r="9" fill="#fafaf9" stroke="#1c1917" stroke-width="1.3" filter="url(#logoShadow)"/>
+    <circle cx="66" cy="40" r="7" fill="url(#logoStoneGradient)" opacity="0.4"/>
+    
+    <!-- Connection line -->
+    <line x1="27" y1="40" x2="57" y2="40" stroke="#78716c" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+  </g>
+  
+  <!-- Text: GOMOKU -->
+  <text x="120" y="78" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="58" font-weight="700" fill="#1c1917" letter-spacing="5">GOMOKU</text>
+  
+  <!-- Decorative line under text -->
+  <line x1="120" y1="88" x2="400" y2="88" stroke="#78716c" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+</svg>

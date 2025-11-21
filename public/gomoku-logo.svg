@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fafaf9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5f5f4;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="stoneGradient" cx="50%" cy="30%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0" />
+    </radialGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.5"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with subtle border -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGradient)" stroke="#d6d3d1" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#78716c" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- Subtle grid pattern in background -->
+  <g opacity="0.12" stroke="#78716c" stroke-width="0.5">
+    <line x1="45" y1="45" x2="155" y2="45"/>
+    <line x1="45" y1="70" x2="155" y2="70"/>
+    <line x1="45" y1="95" x2="155" y2="95"/>
+    <line x1="45" y1="120" x2="155" y2="120"/>
+    <line x1="45" y1="145" x2="155" y2="145"/>
+    <line x1="45" y1="45" x2="45" y2="145"/>
+    <line x1="70" y1="45" x2="70" y2="145"/>
+    <line x1="95" y1="45" x2="95" y2="145"/>
+    <line x1="120" y1="45" x2="120" y2="145"/>
+    <line x1="145" y1="45" x2="145" y2="145"/>
+  </g>
+  
+  <!-- Five connected stones representing winning line -->
+  <!-- Black stones with subtle highlight -->
+  <circle cx="55" cy="100" r="13" fill="#1c1917" filter="url(#shadow)"/>
+  <circle cx="55" cy="100" r="13" fill="url(#stoneGradient)"/>
+  <circle cx="75" cy="100" r="13" fill="#1c1917" filter="url(#shadow)"/>
+  <circle cx="75" cy="100" r="13" fill="url(#stoneGradient)"/>
+  <circle cx="95" cy="100" r="13" fill="#1c1917" filter="url(#shadow)"/>
+  <circle cx="95" cy="100" r="13" fill="url(#stoneGradient)"/>
+  
+  <!-- White stones with border and highlight -->
+  <circle cx="115" cy="100" r="13" fill="#fafaf9" stroke="#1c1917" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="115" cy="100" r="10" fill="url(#stoneGradient)" opacity="0.4"/>
+  <circle cx="135" cy="100" r="13" fill="#fafaf9" stroke="#1c1917" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="135" cy="100" r="10" fill="url(#stoneGradient)" opacity="0.4"/>
+  
+  <!-- Subtle connection line between stones -->
+  <line x1="68" y1="100" x2="127" y2="100" stroke="#78716c" stroke-width="2.5" stroke-linecap="round" opacity="0.25"/>
+</svg>
