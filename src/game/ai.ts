@@ -3,6 +3,18 @@ import { BOARD_SIZE, checkWin } from './logic';
 
 const MAX_DEPTH = 3; // Depth of the minimax search
 
+// Move explanation reason types
+export type MoveReason = 
+    | 'win'
+    | 'blockWin'
+    | 'createOpenFour'
+    | 'blockOpenFour'
+    | 'createFour'
+    | 'blockFour'
+    | 'createOpenThree'
+    | 'blockOpenThree'
+    | 'strategic';
+
 // Heuristic weights
 const SCORES = {
     WIN: 100000,
@@ -12,6 +24,70 @@ const SCORES = {
     THREE: 100,
     OPEN_TWO: 100,
     TWO: 10,
+};
+
+// Check what patterns exist at a specific position for a given player
+interface PatternInfo {
+    openFour: number;  // 4 with 2 open ends
+    four: number;      // 4 with 1 open end
+    openThree: number; // 3 with 2 open ends
+    three: number;     // 3 with 1 open end
+}
+
+const checkPatternsAtPosition = (
+    board: BoardState,
+    x: number,
+    y: number,
+    player: Player
+): PatternInfo => {
+    const patterns: PatternInfo = {
+        openFour: 0,
+        four: 0,
+        openThree: 0,
+        three: 0,
+    };
+
+    if (board[x][y] !== player) return patterns;
+
+    const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+    for (const [dx, dy] of directions) {
+        // Only check if it's the start of a sequence to avoid double counting
+        if (x - dx >= 0 && x - dx < BOARD_SIZE && y - dy >= 0 && y - dy < BOARD_SIZE && board[x - dx][y - dy] === player) {
+            continue;
+        }
+
+        let count = 0;
+        let openEnds = 0;
+
+        // Check forward
+        let nx = x;
+        let ny = y;
+        while (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === player) {
+            count++;
+            nx += dx;
+            ny += dy;
+        }
+
+        // Check ends
+        if (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === null) {
+            openEnds++;
+        }
+        if (x - dx >= 0 && x - dx < BOARD_SIZE && y - dy >= 0 && y - dy < BOARD_SIZE && board[x - dx][y - dy] === null) {
+            openEnds++;
+        }
+
+        // Classify the pattern
+        if (count === 4) {
+            if (openEnds === 2) patterns.openFour++;
+            else if (openEnds === 1) patterns.four++;
+        } else if (count === 3) {
+            if (openEnds === 2) patterns.openThree++;
+            else if (openEnds === 1) patterns.three++;
+        }
+    }
+
+    return patterns;
 };
 
 // Evaluate the board for the given player
@@ -160,6 +236,135 @@ const minimax = (
     }
 };
 
+// Get explanation for why a specific move is recommended
+export const getMoveExplanation = (
+    board: BoardState,
+    x: number,
+    y: number,
+    player: Player
+): MoveReason => {
+    if (board[x][y] !== null) return 'strategic'; // Invalid move
+
+    const opponent: Player = player === 'black' ? 'white' : 'black';
+
+    // Priority 1: Check if this move wins (need to place piece first)
+    board[x][y] = player;
+    if (checkWin(board, x, y, player)) {
+        board[x][y] = null;
+        return 'win';
+    }
+
+    // Priority 2: Check if this move blocks opponent's win
+    // Check BEFORE placing piece if opponent has a win threat at this position
+    board[x][y] = null; // Remove piece to check opponent threats
+    const opponentWouldWin = checkOpponentWinThreat(board, x, y, opponent);
+    if (opponentWouldWin) {
+        return 'blockWin';
+    }
+
+    // Check what patterns this move creates (place piece again)
+    board[x][y] = player;
+    const createdPatterns = checkPatternsAtPosition(board, x, y, player);
+    board[x][y] = null;
+
+    // Check what patterns opponent has that we're blocking
+    const blockedPatterns = checkBlockedPatterns(board, x, y, opponent);
+
+    // Priority 3: Create open four (very strong - almost guaranteed win)
+    if (createdPatterns.openFour > 0) {
+        return 'createOpenFour';
+    }
+
+    // Priority 4: Block opponent's open four (critical defense)
+    if (blockedPatterns.openFour > 0) {
+        return 'blockOpenFour';
+    }
+
+    // Priority 5: Create four (strong threat)
+    if (createdPatterns.four > 0) {
+        return 'createFour';
+    }
+
+    // Priority 6: Block opponent's four
+    if (blockedPatterns.four > 0) {
+        return 'blockFour';
+    }
+
+    // Priority 7: Create open three (good threat)
+    if (createdPatterns.openThree > 0) {
+        return 'createOpenThree';
+    }
+
+    // Priority 8: Block opponent's open three
+    if (blockedPatterns.openThree > 0) {
+        return 'blockOpenThree';
+    }
+
+    // Default: strategic move
+    return 'strategic';
+};
+
+// Helper: Check if opponent has a winning threat that placing at (x,y) would block
+const checkOpponentWinThreat = (
+    board: BoardState,
+    x: number,
+    y: number,
+    opponent: Player
+): boolean => {
+    // Check all directions from this position to see if opponent has exactly 4 in a row
+    // with this position being one of the open ends
+    const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+    for (const [dx, dy] of directions) {
+        let forwardCount = 0;
+        let backwardCount = 0;
+
+        // Check forward direction
+        let nx = x + dx;
+        let ny = y + dy;
+        while (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === opponent) {
+            forwardCount++;
+            nx += dx;
+            ny += dy;
+        }
+        const forwardOpen = nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === null;
+
+        // Check backward direction
+        nx = x - dx;
+        ny = y - dy;
+        while (nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === opponent) {
+            backwardCount++;
+            nx -= dx;
+            ny -= dy;
+        }
+        const backwardOpen = nx >= 0 && nx < BOARD_SIZE && ny >= 0 && ny < BOARD_SIZE && board[nx][ny] === null;
+
+        const totalCount = forwardCount + backwardCount;
+
+        // If opponent has exactly 4 in a row and this position is at an open end, this blocks their win
+        // We need at least one open end (either forward or backward) for it to be a threat
+        if (totalCount === 4 && (forwardOpen || backwardOpen)) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+// Helper: Check what patterns would be blocked by placing at (x, y)
+const checkBlockedPatterns = (
+    board: BoardState,
+    x: number,
+    y: number,
+    opponent: Player
+): PatternInfo => {
+    // Temporarily place opponent's piece to see what patterns they would have
+    board[x][y] = opponent;
+    const patterns = checkPatternsAtPosition(board, x, y, opponent);
+    board[x][y] = null;
+    return patterns;
+};
+
 export const getBestMove = (board: BoardState, player: Player): { x: number, y: number } | null => {
     let bestScore = -Infinity;
     let bestMove: { x: number, y: number } | null = null;
@@ -210,4 +415,16 @@ export const getBestMove = (board: BoardState, player: Player): { x: number, y: 
     }
 
     return bestMove;
+};
+
+// Get best move with explanation for teaching mode
+export const getBestMoveWithExplanation = (
+    board: BoardState,
+    player: Player
+): { x: number, y: number, reason: MoveReason } | null => {
+    const bestMove = getBestMove(board, player);
+    if (!bestMove) return null;
+
+    const reason = getMoveExplanation(board, bestMove.x, bestMove.y, player);
+    return { ...bestMove, reason };
 };

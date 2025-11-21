@@ -36,6 +36,15 @@ export interface Translations {
     aiSuggestion: string;
     goodMove: string;
     considerThis: string;
+    hintReasonWin: string;
+    hintReasonBlockWin: string;
+    hintReasonCreateOpenFour: string;
+    hintReasonBlockOpenFour: string;
+    hintReasonCreateFour: string;
+    hintReasonBlockFour: string;
+    hintReasonCreateOpenThree: string;
+    hintReasonBlockOpenThree: string;
+    hintReasonStrategic: string;
     // Review Mode
     loadGame: string;
     previousMove: string;
@@ -91,6 +100,15 @@ export const translations: Record<Language, Translations> = {
         aiSuggestion: 'AI Suggestion',
         goodMove: 'Good move!',
         considerThis: 'Consider this position',
+        hintReasonWin: 'Winning move',
+        hintReasonBlockWin: 'Blocks opponent\'s winning move',
+        hintReasonCreateOpenFour: 'Creates an open four (strong threat)',
+        hintReasonBlockOpenFour: 'Blocks opponent\'s open four',
+        hintReasonCreateFour: 'Creates a four (threat)',
+        hintReasonBlockFour: 'Blocks opponent\'s four',
+        hintReasonCreateOpenThree: 'Creates an open three',
+        hintReasonBlockOpenThree: 'Blocks opponent\'s open three',
+        hintReasonStrategic: 'Good strategic position',
         // Review
         loadGame: 'Load Game',
         previousMove: 'Previous',
@@ -144,6 +162,15 @@ export const translations: Record<Language, Translations> = {
         aiSuggestion: 'AI建议',
         goodMove: '好棋！',
         considerThis: '考虑此位置',
+        hintReasonWin: '获胜',
+        hintReasonBlockWin: '阻止对手获胜',
+        hintReasonCreateOpenFour: '形成活四（强威胁）',
+        hintReasonBlockOpenFour: '阻止对手活四',
+        hintReasonCreateFour: '形成四（威胁）',
+        hintReasonBlockFour: '阻止对手四',
+        hintReasonCreateOpenThree: '形成活三',
+        hintReasonBlockOpenThree: '阻止对手活三',
+        hintReasonStrategic: '好的战略位置',
         // Review
         loadGame: '载入棋谱',
         previousMove: '上一手',
@@ -197,6 +224,15 @@ export const translations: Record<Language, Translations> = {
         aiSuggestion: 'AI提案',
         goodMove: '良い手！',
         considerThis: 'この位置を考慮',
+        hintReasonWin: '勝利の手',
+        hintReasonBlockWin: '相手の勝利を阻止',
+        hintReasonCreateOpenFour: '活四を作る（強力な脅威）',
+        hintReasonBlockOpenFour: '相手の活四を阻止',
+        hintReasonCreateFour: '四を作る（脅威）',
+        hintReasonBlockFour: '相手の四を阻止',
+        hintReasonCreateOpenThree: '活三を作る',
+        hintReasonBlockOpenThree: '相手の活三を阻止',
+        hintReasonStrategic: '良い戦略的位置',
         // Review
         loadGame: '棋譜読込',
         previousMove: '前の手',

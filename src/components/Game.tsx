@@ -3,7 +3,7 @@ import Board from './Board';
 import Confetti from './Confetti';
 import type { BoardState, Player } from '../game/logic';
 import { createEmptyBoard, checkWin } from '../game/logic';
-import { getBestMove } from '../game/ai';
+import { getBestMove, getBestMoveWithExplanation, type MoveReason } from '../game/ai';
 import { useLanguage } from '../i18n/LanguageContext';
 import type { Language } from '../i18n/translations';
 import { soundManager } from '../utils/sounds';
@@ -40,7 +40,7 @@ const Game: React.FC = () => {
 
     // Teaching mode state
     const [showHint, setShowHint] = useState(false);
-    const [aiHint, setAiHint] = useState<{ x: number, y: number } | null>(null);
+    const [aiHint, setAiHint] = useState<{ x: number, y: number, reason: MoveReason } | null>(null);
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
 
@@ -276,15 +276,33 @@ const Game: React.FC = () => {
     };
 
     const getHint = () => {
-        const hint = getBestMove(board, currentPlayer);
-        setAiHint(hint);
-        setShowHint(true);
-        soundManager.playHintSound();
-        setTimeout(() => {
-            setShowHint(false);
-            setAiHint(null);
-        }, 3000);
+        const hintWithReason = getBestMoveWithExplanation(board, currentPlayer);
+        if (hintWithReason) {
+            setAiHint(hintWithReason);
+            setShowHint(true);
+            soundManager.playHintSound();
+            setTimeout(() => {
+                setShowHint(false);
+                setAiHint(null);
+            }, 3000);
+        }
     };
+
+    const getHintReasonText = (reason: MoveReason): string => {
+        const reasonMap: Record<MoveReason, keyof typeof t> = {
+            win: 'hintReasonWin',
+            blockWin: 'hintReasonBlockWin',
+            createOpenFour: 'hintReasonCreateOpenFour',
+            blockOpenFour: 'hintReasonBlockOpenFour',
+            createFour: 'hintReasonCreateFour',
+            blockFour: 'hintReasonBlockFour',
+            createOpenThree: 'hintReasonCreateOpenThree',
+            blockOpenThree: 'hintReasonBlockOpenThree',
+            strategic: 'hintReasonStrategic',
+        };
+        return t[reasonMap[reason]];
+    };
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -628,7 +646,8 @@ const Game: React.FC = () => {
                     {playMode === 'teaching' && showHint && aiHint && (
                         <div className="material-card bg-success-50 border-2 border-success-400 shadow-elevation-2 p-4 rounded-2xl animate-slide-in">
                             <div className="text-sm font-medium text-success-700 mb-1">{t.aiSuggestion}</div>
-                            <div className="text-lg font-bold text-success-800">({aiHint.x}, {aiHint.y})</div>
+                            <div className="text-lg font-bold text-success-800 mb-2">({aiHint.x}, {aiHint.y})</div>
+                            <div className="text-sm text-success-600">{getHintReasonText(aiHint.reason)}</div>
                         </div>
                     )}
 
@@ -710,7 +729,7 @@ const Game: React.FC = () => {
                         board={board}
                         onCellClick={handleCellClick}
                         lastMove={lastMove}
-                        hintMove={playMode === 'teaching' && showHint ? aiHint : null}
+                        hintMove={playMode === 'teaching' && showHint && aiHint ? { x: aiHint.x, y: aiHint.y } : null}
                         hoverMove={hoverMove}
                     />
 
