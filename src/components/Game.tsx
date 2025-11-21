@@ -44,6 +44,11 @@ const Game: React.FC = () => {
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
 
+    // Speed and duration control states (reasonable defaults)
+    const [spectatorSpeed, setSpectatorSpeed] = useState(800); // Medium: 800ms
+    const [reviewSpeed, setReviewSpeed] = useState(1000); // Medium: 1000ms
+    const [matchDuration, setMatchDuration] = useState(600); // Standard: 10 minutes
+
     // Sync sound manager with state
     useEffect(() => {
         soundManager.setEnabled(soundEnabled);
@@ -84,14 +89,14 @@ const Game: React.FC = () => {
         if (playMode === 'review' && isAutoPlaying && reviewIndex < moveHistory.length) {
             const timeout = setTimeout(() => {
                 setReviewIndex(prev => prev + 1);
-            }, 1000);
+            }, reviewSpeed); // Use configurable review speed
             return () => clearTimeout(timeout);
         } else if (reviewIndex >= moveHistory.length) {
             // Stop auto-playing when review completes
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAutoPlaying(false);
         }
-    }, [playMode, isAutoPlaying, reviewIndex, moveHistory.length]);
+    }, [playMode, isAutoPlaying, reviewIndex, moveHistory.length, reviewSpeed]);
 
     // Update board for review mode
     useEffect(() => {
@@ -213,10 +218,10 @@ const Game: React.FC = () => {
                     }
                 }
                 setIsAiThinking(false);
-            }, 800); // Slightly slower for spectators to watch
+            }, spectatorSpeed); // Use configurable spectator speed
             return () => clearTimeout(timeoutId);
         }
-    }, [currentPlayer, winner, board, playMode]);
+    }, [currentPlayer, winner, board, playMode, spectatorSpeed]);
 
     const resetGame = () => {
         setBoard(createEmptyBoard());
@@ -225,8 +230,8 @@ const Game: React.FC = () => {
         setLastMove(null);
         setIsAiThinking(false);
         setMoveHistory([]);
-        setBlackTime(600);
-        setWhiteTime(600);
+        setBlackTime(matchDuration); // Use configurable match duration
+        setWhiteTime(matchDuration); // Use configurable match duration
         setIsTimerRunning(false);
         setReviewIndex(0);
         setIsAutoPlaying(false);
@@ -492,6 +497,60 @@ const Game: React.FC = () => {
                                     <div className="text-2xl font-mono font-bold">{formatTime(whiteTime)}</div>
                                 </div>
                             </div>
+
+                            {/* Match Duration Selector */}
+                            <div className="mt-3 pt-3 border-t border-surface-200">
+                                <div className="text-xs font-medium text-gray-600 mb-2">{t.matchDuration}</div>
+                                <div className="flex gap-1.5 flex-wrap">
+                                    {[
+                                        { label: t.lightning, value: 180, emoji: '⚡' },
+                                        { label: t.blitz, value: 300, emoji: '⏱️' },
+                                        { label: t.standard, value: 600, emoji: '🎯' },
+                                        { label: t.long, value: 900, emoji: '📚' },
+                                        { label: t.tournament, value: 1800, emoji: '🏆' },
+                                    ].map(({ label, value, emoji }) => (
+                                        <button
+                                            key={value}
+                                            onClick={() => {
+                                                setMatchDuration(value);
+                                                setBlackTime(value);
+                                                setWhiteTime(value);
+                                            }}
+                                            className={`px-2.5 py-1 text-xs rounded-full transition-all ${matchDuration === value
+                                                    ? 'bg-primary-500 text-white shadow-elevation-2'
+                                                    : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
+                                                }`}
+                                        >
+                                            {emoji} {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Spectator Speed Control */}
+                    {playMode === 'spectator' && (
+                        <div className="material-card bg-surface shadow-elevation-2 p-4 rounded-2xl">
+                            <div className="text-sm font-medium text-gray-600 mb-2">{t.speed}</div>
+                            <div className="flex gap-2">
+                                {[
+                                    { label: t.slow, value: 1500, emoji: '🐌' },
+                                    { label: t.medium, value: 800, emoji: '🚶' },
+                                    { label: t.fast, value: 400, emoji: '🏃' },
+                                ].map(({ label, value, emoji }) => (
+                                    <button
+                                        key={value}
+                                        onClick={() => setSpectatorSpeed(value)}
+                                        className={`flex-1 px-3 py-2 text-sm rounded-full transition-all ${spectatorSpeed === value
+                                            ? 'bg-primary-500 text-white shadow-elevation-2'
+                                            : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
+                                            }`}
+                                    >
+                                        {emoji} {label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -605,29 +664,54 @@ const Game: React.FC = () => {
 
                     {/* Review mode controls */}
                     {playMode === 'review' && (
-                        <div className="flex gap-3 items-center material-card bg-surface shadow-elevation-2 p-4 rounded-2xl">
-                            <button
-                                onClick={() => setReviewIndex(Math.max(0, reviewIndex - 1))}
-                                disabled={reviewIndex === 0}
-                                className="ripple material-button material-button-outlined px-4 py-2 rounded-full font-medium disabled:opacity-38"
-                            >
-                                ← {t.previousMove}
-                            </button>
-                            <button
-                                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                                className={`ripple material-button material-button-contained px-6 py-2 rounded-full font-medium ${isAutoPlaying ? 'bg-warning-500' : 'bg-primary-500'
-                                    }`}
-                            >
-                                {isAutoPlaying ? t.pause : t.autoPlay}
-                            </button>
-                            <button
-                                onClick={() => setReviewIndex(Math.min(moveHistory.length, reviewIndex + 1))}
-                                disabled={reviewIndex >= moveHistory.length}
-                                className="ripple material-button material-button-outlined px-4 py-2 rounded-full font-medium disabled:opacity-38"
-                            >
-                                {t.nextMove} →
-                            </button>
-                        </div>
+                        <>
+                            <div className="flex gap-3 items-center material-card bg-surface shadow-elevation-2 p-4 rounded-2xl">
+                                <button
+                                    onClick={() => setReviewIndex(Math.max(0, reviewIndex - 1))}
+                                    disabled={reviewIndex === 0}
+                                    className="ripple material-button material-button-outlined px-4 py-2 rounded-full font-medium disabled:opacity-38"
+                                >
+                                    ← {t.previousMove}
+                                </button>
+                                <button
+                                    onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                                    className={`ripple material-button material-button-contained px-6 py-2 rounded-full font-medium ${isAutoPlaying ? 'bg-warning-500' : 'bg-primary-500'
+                                        }`}
+                                >
+                                    {isAutoPlaying ? t.pause : t.autoPlay}
+                                </button>
+                                <button
+                                    onClick={() => setReviewIndex(Math.min(moveHistory.length, reviewIndex + 1))}
+                                    disabled={reviewIndex >= moveHistory.length}
+                                    className="ripple material-button material-button-outlined px-4 py-2 rounded-full font-medium disabled:opacity-38"
+                                >
+                                    {t.nextMove} →
+                                </button>
+                            </div>
+
+                            {/* Review Speed Control */}
+                            <div className="material-card bg-surface shadow-elevation-2 p-4 rounded-2xl">
+                                <div className="text-sm font-medium text-gray-600 mb-2">{t.playbackSpeed}</div>
+                                <div className="flex gap-2">
+                                    {[
+                                        { label: t.slow, value: 2000, emoji: '🐌' },
+                                        { label: t.medium, value: 1000, emoji: '🚶' },
+                                        { label: t.fast, value: 500, emoji: '🏃' },
+                                    ].map(({ label, value, emoji }) => (
+                                        <button
+                                            key={value}
+                                            onClick={() => setReviewSpeed(value)}
+                                            className={`flex-1 px-3 py-2 text-sm rounded-full transition-all ${reviewSpeed === value
+                                                ? 'bg-primary-500 text-white shadow-elevation-2'
+                                                : 'bg-surface-100 text-gray-700 hover:bg-surface-200'
+                                                }`}
+                                        >
+                                            {emoji} {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     {/* Teaching mode hint button */}
@@ -662,7 +746,7 @@ const Game: React.FC = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -24,6 +24,13 @@ export interface Translations {
     blackTime: string;
     whiteTime: string;
     timePerMove: string;
+    matchDuration: string;
+    lightning: string;
+    blitz: string;
+    standard: string;
+    long: string;
+    tournament: string;
+    startGame: string;
     // Teaching Mode
     hint: string;
     aiSuggestion: string;
@@ -36,6 +43,12 @@ export interface Translations {
     autoPlay: string;
     pause: string;
     gameNotation: string;
+    // Speed Control
+    speed: string;
+    slow: string;
+    medium: string;
+    fast: string;
+    playbackSpeed: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -63,6 +76,13 @@ export const translations: Record<Language, Translations> = {
         blackTime: 'Black Time',
         whiteTime: 'White Time',
         timePerMove: 'Time per move',
+        matchDuration: 'Match Duration',
+        lightning: 'Lightning',
+        blitz: 'Blitz',
+        standard: 'Standard',
+        long: 'Long',
+        tournament: 'Tournament',
+        startGame: 'Start Game',
         // Teaching
         hint: 'Hint',
         aiSuggestion: 'AI Suggestion',
@@ -75,6 +95,12 @@ export const translations: Record<Language, Translations> = {
         autoPlay: 'Auto Play',
         pause: 'Pause',
         gameNotation: 'Game Notation',
+        // Speed Control
+        speed: 'Speed',
+        slow: 'Slow',
+        medium: 'Medium',
+        fast: 'Fast',
+        playbackSpeed: 'Playback Speed',
     },
     zh: {
         title: '五子棋',
@@ -100,6 +126,13 @@ export const translations: Record<Language, Translations> = {
         blackTime: '黑方时间',
         whiteTime: '白方时间',
         timePerMove: '单步用时',
+        matchDuration: '比赛时长',
+        lightning: '闪电战',
+        blitz: '快棋',
+        standard: '标准',
+        long: '长考',
+        tournament: '正式赛',
+        startGame: '开始游戏',
         // Teaching
         hint: '提示',
         aiSuggestion: 'AI建议',
@@ -112,6 +145,12 @@ export const translations: Record<Language, Translations> = {
         autoPlay: '自动播放',
         pause: '暂停',
         gameNotation: '棋谱记录',
+        // Speed Control
+        speed: '速度',
+        slow: '慢速',
+        medium: '中速',
+        fast: '快速',
+        playbackSpeed: '播放速度',
     },
     ja: {
         title: '五目並べ',
@@ -137,6 +176,13 @@ export const translations: Record<Language, Translations> = {
         blackTime: '黒の時間',
         whiteTime: '白の時間',
         timePerMove: '一手の時間',
+        matchDuration: '対局時間',
+        lightning: '稲妻',
+        blitz: '早指し',
+        standard: '標準',
+        long: '長考',
+        tournament: '大会',
+        startGame: 'ゲーム開始',
         // Teaching
         hint: 'ヒント',
         aiSuggestion: 'AI提案',
@@ -149,5 +195,11 @@ export const translations: Record<Language, Translations> = {
         autoPlay: '自動再生',
         pause: '一時停止',
         gameNotation: '棋譜',
+        // Speed Control
+        speed: '速度',
+        slow: '遅い',
+        medium: '標準',
+        fast: '速い',
+        playbackSpeed: '再生速度',
     },
 };
