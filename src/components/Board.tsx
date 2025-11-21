@@ -6,9 +6,10 @@ interface BoardProps {
     board: BoardState;
     onCellClick: (x: number, y: number) => void;
     lastMove: { x: number, y: number } | null;
+    hintMove?: { x: number, y: number } | null;
 }
 
-const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove }) => {
+const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove, hintMove }) => {
     return (
         <div className="relative p-4 bg-[#e0c090] rounded-lg shadow-2xl border-8 border-[#8b5a2b]"
             style={{
@@ -33,25 +34,34 @@ const Board: React.FC<BoardProps> = ({ board, onCellClick, lastMove }) => {
 
                 {/* Cells and Pieces */}
                 {board.map((row, x) => (
-                    row.map((cell, y) => (
-                        <div key={`${x}-${y}`}
-                            className="w-8 h-8 flex items-center justify-center relative z-10 cursor-pointer"
-                            onClick={() => onCellClick(x, y)}>
-                            {cell && (
-                                <div className={`w-7 h-7 rounded-full shadow-md transition-all duration-200 transform scale-100
-                                ${cell === 'black'
-                                        ? 'bg-gradient-to-br from-gray-800 to-black'
-                                        : 'bg-gradient-to-br from-white to-gray-200'}
-                                ${lastMove?.x === x && lastMove?.y === y ? 'ring-2 ring-red-500 ring-offset-1' : ''}`}>
-                                    <div className={`w-2 h-2 rounded-full absolute top-1.5 left-1.5 opacity-50
-                                  ${cell === 'black' ? 'bg-gray-600' : 'bg-white'}`} />
-                                </div>
-                            )}
-                            {!cell && (
-                                <div className="w-full h-full opacity-0 hover:opacity-30 bg-black rounded-full transform scale-50 transition-opacity duration-200" />
-                            )}
-                        </div>
-                    ))
+                    row.map((cell, y) => {
+                        const isLastMove = lastMove?.x === x && lastMove?.y === y;
+                        const isHint = hintMove?.x === x && hintMove?.y === y;
+
+                        return (
+                            <div key={`${x}-${y}`}
+                                className="w-8 h-8 flex items-center justify-center relative z-10 cursor-pointer"
+                                onClick={() => onCellClick(x, y)}>
+                                {cell && (
+                                    <div className={`w-7 h-7 rounded-full shadow-md transition-all duration-200 transform scale-100
+                                    ${cell === 'black'
+                                            ? 'bg-gradient-to-br from-gray-800 to-black'
+                                            : 'bg-gradient-to-br from-white to-gray-200'
+                                        }
+                                    ${isLastMove ? 'ring-2 ring-red-500 ring-offset-1' : ''}`}>
+                                        <div className={`w-2 h-2 rounded-full absolute top-1.5 left-1.5 opacity-50
+                                      ${cell === 'black' ? 'bg-gray-600' : 'bg-white'}`} />
+                                    </div>
+                                )}
+                                {!cell && isHint && (
+                                    <div className="w-6 h-6 rounded-full bg-green-400 opacity-50 animate-pulse" />
+                                )}
+                                {!cell && !isHint && (
+                                    <div className="w-full h-full opacity-0 hover:opacity-30 bg-black rounded-full transform scale-50 transition-opacity duration-200" />
+                                )}
+                            </div>
+                        );
+                    })
                 ))}
             </div>
         </div>
