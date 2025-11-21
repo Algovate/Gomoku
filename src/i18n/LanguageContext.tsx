@@ -12,7 +12,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [language, setLanguage] = useState<Language>('en');
+    const [language, setLanguage] = useState<Language>('zh');
 
     const value: LanguageContextType = {
         language,
@@ -27,6 +27,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLanguage = () => {
     const context = useContext(LanguageContext);
     if (!context) {
